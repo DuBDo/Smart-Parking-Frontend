@@ -1,13 +1,13 @@
 import React from 'react'
 import NavBar from '../components/NavBar'
 import Hero from '../sections/Hero'
-import SearchSection from '../sections/SearchSection'
+import SecondSection from '../sections/SecondSection'
 
 function Home() {
   return (
     <>
         <Hero/>
-        
+        <SecondSection/>
     </>
   )
 }
