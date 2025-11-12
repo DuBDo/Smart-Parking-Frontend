@@ -4,6 +4,7 @@ import Signup from './pages/Signup'
 import RentSpace from './pages/RentSpace';
 import NavBar from './components/NavBar';
 import Home from './pages/Home';
+import Footer from './components/Footer';
 
 function App() {
   return (  <>
@@ -16,6 +17,7 @@ function App() {
 
         <Route path='/dashboard/rent-space' element={<RentSpace/>}/>
       </Routes>
+      <Footer/>
     </>
   );
 }
