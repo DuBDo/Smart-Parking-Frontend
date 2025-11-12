@@ -34,7 +34,7 @@ const AuthForm = ({ type }) => {
         navigate('/login');
       }
     } catch (error) {
-      alert(error.response?.data?.message || "Something went wrong");
+      console.log(error.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -42,7 +42,7 @@ const AuthForm = ({ type }) => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-2xl shadow-md w-96"
+        className="bg-white p-8 rounded-2xl shadow-md w-xl"
       >
         <h2 className="text-2xl font-semibold mb-4 text-center capitalize">
           {type === "login" ? "Login" : "Create Account"}

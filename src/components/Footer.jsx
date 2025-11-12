@@ -22,11 +22,11 @@ function Footer() {
                     <p className='mt-10  font-semibold text-3xs'>Your spot, just a tap away</p>
 
                     <div className='flex-1 flex items-end justify-between'>
-                        <FaFacebook size={24} />
+                        <FaFacebook size={24} className='cursor-pointer'/>
 
-                        <FaInstagram size={25} />
-                        <AiFillTwitterCircle size={25} />
-                        <FaTiktok size={22} />
+                        <FaInstagram size={25} className='cursor-pointer'/>
+                        <AiFillTwitterCircle size={25} className='cursor-pointer'/>
+                        <FaTiktok size={22} className='cursor-pointer'/>
                     </div>
                 </div>
 
