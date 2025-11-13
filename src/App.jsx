@@ -5,6 +5,7 @@ import RentSpace from './pages/RentSpace';
 import NavBar from './components/NavBar';
 import Home from './pages/Home';
 import Footer from './components/Footer';
+import ForgotPassword from './pages/ForgotPassword';
 
 function App() {
   return (  <>
@@ -14,6 +15,7 @@ function App() {
         <Route path='/login' element={<Login/>}/>
         <Route path='/signup' element={<Signup/>}/>
         <Route path='/dashboard' element={<Home/>}/>
+        <Route path='/forgot-password' element={<ForgotPassword/>}/>
 
         <Route path='/dashboard/rent-space' element={<RentSpace/>}/>
       </Routes>

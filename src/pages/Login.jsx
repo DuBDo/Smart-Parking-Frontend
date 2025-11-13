@@ -96,7 +96,7 @@ function Login() {
             </div>
             <div className='flex justify-between items-center my-8'>
               <p className='text-red-500 w-fit '>{loginError}</p>
-              <p className='text-[#1fa637] cursor-pointer'>I've forgotten my password</p>
+              <p className='text-[#1fa637] cursor-pointer' onClick={()=>navigate('/forgot-password')}>I've forgotten my password</p>
             </div>
             <div className='mt-12 mb-3 flex items-center justify-between'>
               <button className='text-[#1fa637] text-lg cursor-pointer'
