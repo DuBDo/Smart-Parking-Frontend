@@ -6,14 +6,17 @@ import NavBar from './components/NavBar';
 import Home from './pages/Home';
 import Footer from './components/Footer';
 import ForgotPassword from './pages/ForgotPassword';
+import LandingPage from './pages/LandingPage';
+import AuthSuccess from './pages/AuthSuccess';
 
 function App() {
   return (  <>
       <NavBar/>
       <Routes>
-        <Route path='/' element={<Navigate to={'/login'}/>}/>
+        <Route path='/' element={<LandingPage/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/signup' element={<Signup/>}/>
+        <Route path='/auth-success' element={<AuthSuccess/>}/>
         <Route path='/dashboard' element={<Home/>}/>
         <Route path='/forgot-password' element={<ForgotPassword/>}/>
 
