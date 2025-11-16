@@ -9,6 +9,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import LandingPage from './pages/LandingPage';
 import AuthSuccess from './pages/AuthSuccess';
 import ProtectedRoute from './components/ProtectedRoute';
+import DriverProfile from './pages/DriverProfile';
 
 function App() {
   return (  <>
@@ -21,6 +22,10 @@ function App() {
         <Route path='/dashboard' element={
           <ProtectedRoute>
             <Home/>
+          </ProtectedRoute>}/>
+        <Route path='/dashboard/profile' element={
+          <ProtectedRoute>
+            <DriverProfile/>
           </ProtectedRoute>}/>
         <Route path='/forgot-password' element={<ForgotPassword/>}/>
 

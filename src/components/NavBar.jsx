@@ -7,6 +7,7 @@ import { logout } from "../redux/userSlice";
 
 const NavBar = () => {
     const [open, setOpen] = useState(false);
+    const [active, setActive] = useState('');
     // NEW STATE: State for the user profile dropdown
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
@@ -21,7 +22,7 @@ const NavBar = () => {
     const authLinks = user
         ? [
             // Dropdown trigger link
-            { path: "", label: user.fullName.split(' ')[0], isDropdown: true }
+            { path: "", label: user.firstName, isDropdown: true }
         ]
         : [
             { path: "/login", label: "Login" },
@@ -63,13 +64,18 @@ const NavBar = () => {
                             // 1 & 2. Dropdown Logic (for logged-in user)
                             <div
                                 key={link.label}
-                                className="cursor-pointer text-gray-700 font-medium"
-                                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} // Toggle state
+                                className={`cursor-pointer font-medium ${active == link.label
+                                        ? "text-[#1fa637] font-semibold"
+                                        : "text-gray-700 hover:text-[#91ac96]"}`}
+                                onClick={() => 
+                                    setActive(link.label)
+                                } // Toggle state
                             >
                                 <div className="text-base flex items-center gap-2 space-x-1 hover:text-[#91ac96]">
                                     <span>{link.label}</span>
                                     <FaChevronDown
                                         className={`text-xs`}
+                                        onClick={()=>setIsUserMenuOpen(!isUserMenuOpen)}
                                     />
                                 </div>
 
@@ -101,18 +107,19 @@ const NavBar = () => {
                             </div>
                         ) : (
                             // 3. Regular NavLink Logic (with no-underline added)
-                            <NavLink
+                            <Link
                                 key={link.path}
                                 to={link.path}
-                                className={({ isActive }) =>
-                                    `font-medium transition-colors duration-200 **no-underline** ${isActive
+                                className={
+                                    `font-medium transition-colors duration-200 **no-underline** ${active == link.label
                                         ? "text-[#1fa637] font-semibold"
                                         : "text-gray-700 hover:text-[#91ac96]"
                                     }`
                                 }
+                                onClick={()=>setActive(link.label)}
                             >
                                 {link.label}
-                            </NavLink>
+                            </Link>
                         )
                     ))}
                 </div>

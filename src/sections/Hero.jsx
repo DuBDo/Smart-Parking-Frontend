@@ -13,7 +13,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 
-import {  } from '@mui/x-date-pickers/timeViewRenderers';
+import { } from '@mui/x-date-pickers/timeViewRenderers';
 import { DigitalClock } from "@mui/x-date-pickers/DigitalClock";
 
 function Hero() {
@@ -89,7 +89,15 @@ function Hero() {
                                                         minDate={dayjs()} // 👈 disables all dates before today
                                                         slotProps={{
                                                             textField: { fullWidth: true },
+                                                            calendarHeader: {
+                                                                sx: {
+                                                                    '& .MuiPickersCalendarHeader-switchViewButton': {
+                                                                        display: 'none',   // Hide the dropdown arrow button
+                                                                    }
+                                                                }
+                                                            }
                                                         }}
+                                                        views={[ 'month', 'day', 'hours', 'minutes']}
                                                     />
                                                 </LocalizationProvider>
                                             </div>
@@ -166,9 +174,16 @@ function Hero() {
                                                         value={fromDateAndTime}
                                                         onChange={(newValue) => setFromDateAndTime(newValue)}
                                                         minDate={dayjs()}
-                                                        
+
                                                         slotProps={{
                                                             textField: { fullWidth: true },
+                                                            calendarHeader: {
+                                                                sx: {
+                                                                    '& .MuiPickersCalendarHeader-switchViewButton': {
+                                                                        display: 'none',   // Hide the dropdown arrow button
+                                                                    }
+                                                                }
+                                                            }
                                                         }}
 
                                                         // --- KEY TO GETTING THIS LIST VIEW ---
@@ -181,7 +196,7 @@ function Hero() {
                                                         timeSteps={{ minutes: 30 }}
 
                                                         // You can also use the views prop to control the selection order
-                                                        views={['year', 'month', 'day', 'hours', 'minutes']}
+                                                        views={[ 'month', 'day', 'hours', 'minutes']}
                                                     />
                                                 </LocalizationProvider>
                                             </div>
@@ -204,6 +219,13 @@ function Hero() {
                                                         minDate={dayjs()}
                                                         slotProps={{
                                                             textField: { fullWidth: true },
+                                                            calendarHeader: {
+                                                                sx: {
+                                                                    '& .MuiPickersCalendarHeader-switchViewButton': {
+                                                                        display: 'none',   // Hide the dropdown arrow button
+                                                                    }
+                                                                }
+                                                            }
                                                         }}
 
                                                         // --- KEY TO GETTING THIS LIST VIEW ---
@@ -216,7 +238,7 @@ function Hero() {
                                                         timeSteps={{ minutes: 30 }}
 
                                                         // You can also use the views prop to control the selection order
-                                                        views={['year', 'month', 'day', 'hours', 'minutes']}
+                                                        views={['month', 'day', 'hours', 'minutes']}
                                                     />
                                                 </LocalizationProvider>
                                             </div>

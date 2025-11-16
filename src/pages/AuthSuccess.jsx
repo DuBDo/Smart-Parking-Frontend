@@ -10,7 +10,6 @@ function AuthSuccess() {
     useEffect(()=>{
         const handleAuth = async()=>{
             const params = new URLSearchParams(window.location.search);
-            console.log(params);
             const token = params.get('token');
             if(token){
                 localStorage.setItem('token', token)
@@ -21,7 +20,7 @@ function AuthSuccess() {
                         }
                     })
                     if(res.data.success){
-                        dispatch(setUser({ user: res.data.user, token: res.data.token }));
+                        dispatch(setUser({ token: token, user: res.data.user }));
                         navigate('/dashboard');
                     }
                 } catch (error) {

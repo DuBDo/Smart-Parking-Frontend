@@ -1,1 +1,15 @@
 @import 'tailwindcss';
+
+.cursor-red {
+  cursor: url('/cursor-red.svg') 16 16, not-allowed;
+}
+
+.no-spinner::-webkit-inner-spin-button,
+.no-spinner::-webkit-outer-spin-button {
+  @apply appearance-none;
+  margin: 0;
+}
+
+.no-spinner {
+  -moz-appearance: textfield;
+}

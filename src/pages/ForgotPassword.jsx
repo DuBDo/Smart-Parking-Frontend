@@ -2,8 +2,10 @@ import { useState } from 'react'
 import logo from '/logo.webp'
 import { useNavigate } from 'react-router';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 function ForgotPassword() {
+    const {user} = useSelector(state=>state.user);
     const [step, setStep] = useState(0);
     const navigate = useNavigate();
 
@@ -116,7 +118,10 @@ function ForgotPassword() {
                                 </div>
                                 <div className='mt-12 mb-3 flex items-center justify-between'>
                                     <button className='text-[#1fa637] text-lg cursor-pointer'
-                                        onClick={() => navigate('/login')}>
+                                        onClick={() => {
+                                            if(user==null) navigate('/login')
+                                            else navigate('/dashboard/profile')
+                                        }}>
                                         Cancel
                                     </button>
                                     <button className='px-14 py-3 text-white rounded-lg font-medium text-lg cursor-pointer bg-[#1fa637] hover:bg-green-700'

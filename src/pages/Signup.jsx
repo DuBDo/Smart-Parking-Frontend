@@ -18,7 +18,8 @@ function Signup() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [fullName, setFullName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [surName, setSurName] = useState('');
   const [mobile, setMobile] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,7 +33,7 @@ function Signup() {
     e.preventDefault();
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (fullName == '') {
+    if (firstName == '') {
       return setSignupError('Please enter your name');
     } else if (mobile.length != 10) {
       return setSignupError('Please enter mobile no. correctly');
@@ -52,7 +53,8 @@ function Signup() {
     }
     try {
       const { data } = await axios.post(`${url}/api/V1/auth/signup`, {
-        fullName,
+        firstName,
+        surName,
         mobile,
         email,
         password,
@@ -74,14 +76,24 @@ function Signup() {
 
           {/* input felds */}
           <form action="" >
-            {/* fullname  */}
+            {/* firstname  */}
             <div className='flex justify-between items-center'>
 
-              <label htmlFor="fullName">Full name</label>
-              <input type="text" id='fullName' value={fullName} placeholder='Enter your full name'
+              <label htmlFor="firstName">First name</label>
+              <input type="text" id='firstName' value={firstName} placeholder='Enter your first name'
                 onChange={(e) => {
                   setSignupError('');
-                  setFullName(e.target.value);
+                  setFirstName(e.target.value);
+                }}
+                className='w-md focus:outline-0 border border-gray-400 rounded h-10 pl-4 py-6' />
+            </div>
+            {/* surname  */}
+            <div className='flex justify-between items-center mt-3'>
+
+              <label htmlFor="surName">Surname</label>
+              <input type="text" id='surName' value={surName} placeholder='Enter last name'
+                onChange={(e) => {
+                  setSurName(e.target.value);
                 }}
                 className='w-md focus:outline-0 border border-gray-400 rounded h-10 pl-4 py-6' />
             </div>
@@ -95,7 +107,7 @@ function Signup() {
 
                   setMobile(e.target.value);
                 }}
-                className='w-md focus:outline-0 border border-gray-400 rounded h-10 pl-4 py-6' />
+                className='non-spinner w-md focus:outline-0 border border-gray-400 rounded h-10 pl-4 py-6' />
             </div>
             {/* email  */}
             <div className='flex justify-between items-center mt-3'>
