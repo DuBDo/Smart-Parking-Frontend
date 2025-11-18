@@ -171,9 +171,11 @@ function DriverProfile() {
                 <Vehicle token={token} user={user}/>
 
                 {/* Address  */}
-                <Address/>
+                
+                <button className="w-full mt-6 py-2.5 px-4 font-medium  text-lg border rounded-lg cursor-pointer text-center"
+                onClick={navigate('/auth/delete')}>Delete my account</button>
             </div>
-
+                            
         </div>
     )
 }

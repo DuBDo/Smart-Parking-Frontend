@@ -10,6 +10,8 @@ import LandingPage from './pages/LandingPage';
 import AuthSuccess from './pages/AuthSuccess';
 import ProtectedRoute from './components/ProtectedRoute';
 import DriverProfile from './pages/DriverProfile';
+import Delete from './pages/Delete';
+import DriverDashboard from './pages/DriverDashboard';
 
 function App() {
   return (  <>
@@ -18,10 +20,18 @@ function App() {
         <Route path='/' element={<LandingPage/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/signup' element={<Signup/>}/>
+        <Route path='/auth/delete' element={
+          <ProtectedRoute>
+          <Delete/>
+          </ProtectedRoute>}/>
         <Route path='/auth-success' element={<AuthSuccess/>}/>
-        <Route path='/dashboard' element={
+        <Route path='/home' element={
           <ProtectedRoute>
             <Home/>
+          </ProtectedRoute>}/>
+          <Route path='/dashboard' element={
+          <ProtectedRoute>
+            <DriverDashboard/>
           </ProtectedRoute>}/>
         <Route path='/dashboard/profile' element={
           <ProtectedRoute>

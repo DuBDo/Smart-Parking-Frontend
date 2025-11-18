@@ -95,6 +95,7 @@ const NavBar = () => {
                                                         handleLogOut();
                                                     }
                                                     else {
+                                                        setIsUserMenuOpen(!isUserMenuOpen)
                                                         setOpen(false);
                                                     }
                                                 }}

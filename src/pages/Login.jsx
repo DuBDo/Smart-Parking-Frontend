@@ -52,7 +52,7 @@ function Login() {
       })
       
         dispatch(setUser({ user: data.user, token: data.token }));
-        navigate('/dashboard')
+        navigate('/home')
     } catch (error) {
       setLoginError(error.response?.data?.message|| 'Server error');
       console.log(error.response?.data?.message || "Something went wrong");

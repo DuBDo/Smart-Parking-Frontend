@@ -59,9 +59,8 @@ function Signup() {
         email,
         password,
       });
-
       dispatch(setUser({ user: data.user, token: data.token }));
-      navigate('/dashboard')
+      navigate('/home')
     } catch (error) {
       setSignupError(error.response?.data?.message || 'Server error');
       console.log(error.response?.data?.message || "Something went wrong");
