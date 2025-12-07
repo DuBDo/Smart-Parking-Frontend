@@ -13,6 +13,7 @@ function Vehicle({ token, user }) {
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
 
+    
     const [success, setSuccess] = useState(false);
     const [failed, setFailed] = useState(false);
     const [plateError, setPlateError] = useState("");
