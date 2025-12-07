@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useMemo } from "react";
 import { useContext } from "react";
 import io from "socket.io-client";
+import { useSelector } from "react-redux";
 
 //creating socket context
 const SocketContext = createContext(null);
@@ -15,13 +16,35 @@ export const useSocket = () => {
 
 //provider component
 export const SocketProvider = ({ children }) => {
-  const socket = useMemo(() => io(import.meta.env.VITE_BACKEND_URL), []);
+  const { user, parkingLot } = useSelector((state) => state.user);
+  const query = {};
+
+  if (user && user.id) {
+    query.userId = user.id;
+  }
+  if (user?.role === "owner" && parkingLot && parkingLot.id) {
+    query.ownerParkingLotId = parkingLot.id;
+  }
+  const socket = useMemo(() => {
+    if (!user || !user.id) {
+      return null;
+    }
+    return io(import.meta.env.VITE_BACKEND_URL, {
+      query,
+      auth: {
+        token: localStorage.getItem("authToken"), // Always good to pass a token if available
+      },
+      autoConnect: true,
+    });
+  }, [user, query, user?.id]);
 
   const [isConnected, setIsConnected] = useState(false);
 
   //connection and event
   useEffect(() => {
     //manually connect the socket
+    if (!socket) return;
+
     socket.connect();
     //define standard event listeners
     socket.on("connect", () => {

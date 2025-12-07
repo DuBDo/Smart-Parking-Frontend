@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import io from "socket.io-client";
 
-const socket = io(import.meta.env.VITE_BACKEND_URL, { withCredentials: true });
+const socket = io(import.meta.env.VITE_BACKEND_URL);
 
 export default function OwnerBookingReceived({ booking }) {
   useEffect(() => {

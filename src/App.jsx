@@ -13,8 +13,9 @@ import DriverProfile from "./pages/DriverProfile";
 import Delete from "./pages/Delete";
 import DriverDashboard from "./pages/DriverDashboard";
 import Listing from "./pages/Listing";
-import BookingsMade from "./components/driver/BookingsMade";
 import Bookings from "./components/driver/Bookings";
+import OwnerBookingReceived from "./components/owner/OwnerBookingReceived";
+import OwnerBookings from "./components/owner/booking/OwnerBookings";
 
 function App() {
   return (
@@ -58,8 +59,11 @@ function App() {
           }
         />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/dashboard/bookings-made" element={<BookingsMade />} />
-        <Route path="/dashboard/book" element={<Bookings />} />
+        <Route path="/dashboard/bookings-made" element={<Bookings />} />
+        <Route
+          path="/dashboard/bookings-received"
+          element={<OwnerBookings />}
+        />
 
         <Route path="/dashboard/rent-space" element={<RentSpace />} />
         <Route

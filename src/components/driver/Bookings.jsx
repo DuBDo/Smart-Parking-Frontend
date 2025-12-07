@@ -1,24 +1,17 @@
-import React from "react";
 import DashboardSideBar from "../DashboardSideBar";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import noBookingsImage from "/booking/no-bookings-found.png";
 import Pagination from "./Pagination";
 import BookingCard from "./BookingCard";
-import { useEffect } from "react";
-
-// Utility: format dates nicely
-const formatDate = (date) =>
-  new Date(date).toLocaleString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+import { useSocket } from "../../utils/SocketContext";
 
 const Bookings = () => {
+  const { socket, isConnected } = useSocket();
+  const { token } = useSelector((state) => state.user);
+  const BACKEND = import.meta.env.VITE_BACKEND_URL;
+
   const tabs = ["pending", "in-progress", "upcoming", "past"];
   const [selectedTab, setSelectedTab] = useState("pending");
   const [loading, setLoading] = useState(false);
@@ -31,12 +24,9 @@ const Bookings = () => {
   const [page, setPage] = useState(1);
   const pageSize = 3;
 
-  const { token } = useSelector((state) => state.user);
-  const BACKEND = import.meta.env.VITE_BACKEND_URL;
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    if (!socket) return;
     setLoading(true);
-    setError(null);
     try {
       const { data } = await axios.get(
         `${BACKEND}/api/V1/booking/${selectedTab}`,
@@ -53,7 +43,6 @@ const Bookings = () => {
       );
       console.log(data);
       setBookings(data.bookings);
-      // set counts if backend provides them (optional). fallback uses array length
       setTotalCounts(data.counts ?? (data.bookings || []).length);
     } catch (error) {
       console.error(err);
@@ -61,11 +50,45 @@ const Bookings = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedTab, page, query]);
+
   useEffect(() => {
     fetchData();
-  }, [selectedTab, page]);
+  }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+  }, [selectedTab, totalCounts, page]);
+
+  //Setting-up Socket-Listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    const events = [
+      "booking:created",
+      "booking:confirmed",
+      "booking:rejected",
+      "booking:inProgress",
+      "booking:entered",
+      "booking:exited",
+      "booking:autoCancelled",
+      "booking:completed",
+      "booking:cancelled",
+      "booking:updated",
+    ];
+
+    const refresh = () => fetchData();
+
+    events.forEach((event) => {
+      socket.on(event, refresh);
+    });
+
+    return () => {
+      events.forEach((event) => socket.off(event, refresh));
+    };
+  }, [socket, fetchData]);
+
   const onCancel = async (booking) => {
+    setLoading(true);
     try {
       const res = await axios.delete(
         `${BACKEND}/api/V1/booking/${booking._id}/cancel`,
@@ -75,10 +98,11 @@ const Bookings = () => {
           },
         }
       );
-      if (!res.ok) throw new Error("Cancel failed");
       fetchData();
     } catch (err) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -97,7 +121,6 @@ const Bookings = () => {
               setSelectedTab("pending");
               setPage(1);
               setBookings([]);
-              fetchData();
             }}
           >
             Pending
@@ -127,7 +150,6 @@ const Bookings = () => {
               setSelectedTab("upcoming");
               setPage(1);
               setBookings([]);
-              fetchData();
             }}
           >
             Upcoming
@@ -142,7 +164,6 @@ const Bookings = () => {
               setSelectedTab("past");
               setPage(1);
               setBookings([]);
-              fetchData();
             }}
           >
             Past

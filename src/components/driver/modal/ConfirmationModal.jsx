@@ -19,7 +19,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
   }, [isOpen]);
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-gray-400/65 transition-opacity"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/75 transition-opacity"
       aria-labelledby="modal-title"
       role="dialog"
       aria-modal="true"

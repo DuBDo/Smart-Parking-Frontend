@@ -37,7 +37,7 @@ const BookingCard = ({ booking, onCancel }) => {
               {booking.parkingLotId?.name || "Parking Lot"}
             </h3>
             <div className="text-sm text-gray-500">
-              {booking.parkingLotId?.address || ""}
+              📍{booking.parkingLotId?.address || ""}
             </div>
           </div>
           <div
