@@ -64,3 +64,118 @@ export const pending = [
     status: "past",
   },
 ];
+
+export const search = [
+  {
+    _id: 9889,
+    name: "Buspark Parking",
+    // woner
+    address: "Lalitpur",
+    image: [
+      "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
+    ],
+    evCharger: true,
+    avgRating: 4.235,
+    totalRatings: 20,
+    totalBookings: 1000,
+    duration: "44mins",
+    price: 100,
+    evCharger: true,
+  },
+  {
+    _id: 9889,
+    name: "Buspark Parking",
+    // woner
+    address: "Lalitpur",
+    image: [
+      "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
+    ],
+    evCharger: true,
+    avgRating: 4.235,
+    totalRatings: 20,
+    totalBookings: 1000,
+    duration: "44mins",
+    price: 100,
+    evCharger: true,
+  },
+  {
+    _id: 9889,
+    name: "Buspark Parking",
+    // woner
+    address: "Lalitpur",
+    image: [
+      "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
+    ],
+    evCharger: true,
+    avgRating: 4.235,
+    totalRatings: 20,
+    totalBookings: 1000,
+    duration: "44mins",
+    price: 100,
+    evCharger: true,
+  },
+  {
+    _id: 9889,
+    name: "Buspark Parking",
+    // woner
+    address: "Lalitpur",
+    image: [
+      "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
+    ],
+    evCharger: true,
+    avgRating: 4.235,
+    totalRatings: 20,
+    totalBookings: 1000,
+    duration: "44mins",
+    price: 100,
+    evCharger: true,
+  },
+  {
+    _id: 9889,
+    name: "Buspark Parking",
+    // woner
+    address: "Lalitpur",
+    image: [
+      "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
+    ],
+    evCharger: true,
+    avgRating: 4.235,
+    totalRatings: 20,
+    totalBookings: 1000,
+    duration: "44mins",
+    price: 100,
+    evCharger: true,
+  },
+  {
+    _id: 9889,
+    name: "Buspark Parking",
+    // woner
+    address: "Lalitpur",
+    image: [
+      "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
+    ],
+    evCharger: true,
+    avgRating: 4.235,
+    totalRatings: 20,
+    totalBookings: 1000,
+    duration: "44mins",
+    price: 100,
+    evCharger: true,
+  },
+  {
+    _id: 9889,
+    name: "Buspark Parking",
+    // woner
+    address: "Lalitpur",
+    image: [
+      "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
+    ],
+    evCharger: true,
+    avgRating: 4.235,
+    totalRatings: 20,
+    totalBookings: 1000,
+    duration: "44mins",
+    price: 100,
+    evCharger: true,
+  },
+];

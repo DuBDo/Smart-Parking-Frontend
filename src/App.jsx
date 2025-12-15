@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router";
+import { Navigate, Route, Routes, useLocation } from "react-router";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import RentSpace from "./pages/RentSpace";
@@ -16,11 +16,22 @@ import Listing from "./pages/Listing";
 import Bookings from "./components/driver/Bookings";
 import OwnerBookingReceived from "./components/owner/OwnerBookingReceived";
 import OwnerBookings from "./components/owner/booking/OwnerBookings";
+import SearchPage from "./pages/SearchPage";
+import ProceedBooking from "./pages/ProceedBooking";
+import ShowParkingLot from "./pages/ShowParkingLot";
 
 function App() {
+  const location = useLocation();
+  const currentPath = location.pathname.toLowerCase();
+  const hideForSearchPage =
+    currentPath.startsWith("/search") ||
+    currentPath.startsWith("/lot") ||
+    currentPath.startsWith("/proceed-booking");
+
   return (
     <>
-      <NavBar />
+      {!hideForSearchPage && <NavBar />}
+
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
@@ -42,6 +53,31 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <SearchPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lot/:id"
+          element={
+            <ProtectedRoute>
+              <ShowParkingLot />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/proceed-booking/:id"
+          element={
+            <ProtectedRoute>
+              <ProceedBooking />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/dashboard"
           element={
@@ -65,7 +101,6 @@ function App() {
           element={<OwnerBookings />}
         />
 
-        <Route path="/dashboard/rent-space" element={<RentSpace />} />
         <Route
           path="/dashboard/listing-onboarding/:name/:post"
           element={
@@ -74,8 +109,10 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/dashboard/rent-space" element={<RentSpace />} />
       </Routes>
-      <Footer />
+      {!hideForSearchPage && <Footer />}
     </>
   );
 }

@@ -13,3 +13,19 @@
 .no-spinner {
   -moz-appearance: textfield;
 }
+
+
+/* for no-bg while selection  */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  box-shadow: 0 0 0px 1000px white inset !important;
+  -webkit-text-fill-color: black !important;
+}
+/* 
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #f3f4f6 inset !important;
+  box-shadow: 0 0 0px 1000px #f3f4f6 inset !important;
+} */
