@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import ConfirmationModal from "./modal/ConfirmationModal";
+import { FaMapMarkerAlt } from "react-icons/fa";
+import { MdOutlineDirections } from "react-icons/md";
 
 function formatDateTime(iso) {
   try {
@@ -11,14 +13,19 @@ function formatDateTime(iso) {
   }
 }
 
-const BookingCard = ({ booking, onCancel }) => {
+const BookingCard = ({
+  setProceedPayment,
+  choseBooking,
+  booking,
+  onCancel,
+}) => {
   const navigate = useNavigate();
   const statusBadge = useMemo(() => {
     const s = booking.bookingStatus;
     const map = {
       confirmed: "bg-yellow-100 text-yellow-800",
       upcoming: "bg-indigo-50 text-indigo-700",
-      "in-progress": "bg-blue-50 text-blue-700",
+      "payment-pending": "bg-blue-50 text-blue-700",
       active: "bg-green-50 text-green-700",
       completed: "bg-gray-100 text-gray-700",
       cancelled: "bg-red-50 text-red-700",
@@ -29,7 +36,13 @@ const BookingCard = ({ booking, onCancel }) => {
   }, [booking.bookingStatus]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   return (
-    <div className="w-full bg-white p-4 rounded-xl shadow-sm border flex flex-col md:flex-row md:justify-between gap-4">
+    <div
+      className={`w-full bg-white p-4 rounded-xl shadow-sm ${
+        booking.bookingStatus === "pending-payment"
+          ? "border border-[#e5e5e5] border-b-2 border-b-[#f93c6a]"
+          : "border border-[#e5e5e5]"
+      } flex flex-col md:flex-row md:justify-between gap-4`}
+    >
       <div className="flex-1">
         <div className="flex items-start justify-between">
           <div>
@@ -90,9 +103,31 @@ const BookingCard = ({ booking, onCancel }) => {
         <div className="text-sm text-gray-500">
           Booked on {formatDateTime(booking.createdAt)}
         </div>
+
+        {/* show on map */}
+        <div className="flex gap-2 items-center text-[14px] underline cursor-pointer">
+          <FaMapMarkerAlt size={20} className="text-[#429aea]" />
+          <p className="text-[#212121]">Show parking lot</p>
+        </div>
         <div className="flex gap-2">
-          {booking.bookingStatus === "pending" && (
+          {(booking.bookingStatus === "pending" ||
+            booking.status == "pending") && (
             <>
+              {/* payment */}
+              {(booking.bookingStatus == "pending-payment" ||
+                booking.paymentStatus == "not-paid") && (
+                <button
+                  className="px-4 py-2 bg-[#1fa637] text-white rounded-lg border text-sm hover:bg-green-700 cursor-pointer"
+                  onClick={() => {
+                    setProceedPayment(true);
+                    choseBooking(booking);
+                  }}
+                >
+                  Proceed payment
+                </button>
+              )}
+
+              {/* cancel button */}
               <button
                 className="px-4 py-2 rounded-lg border text-sm cursor-pointer"
                 onClick={() => {
@@ -131,11 +166,13 @@ const BookingCard = ({ booking, onCancel }) => {
             </>
           )}
 
-          {booking.status === "in-progress" && (
+          {(booking.status === "in-progress" ||
+            booking.status === "cancelled") && (
             <button
               className="px-4 py-2 rounded-lg bg-green-600 text-white cursor-pointer"
               onClick={() => alert("Open navigation")}
             >
+              <MdOutlineDirections />
               Directions
             </button>
           )}

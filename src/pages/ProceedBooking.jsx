@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import SearchNavBar from "../components/SearchNavBar";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -8,11 +8,10 @@ import { MdError } from "react-icons/md";
 import ContactInfo from "../components/parking_and_booking/ContactInfo";
 import VehicleInfo from "../components/parking_and_booking/VehicleInfo";
 import ParkingDetailsCard from "../components/parking_and_booking/ParkingDetailsCard";
-
-import esewa from "/payment-logo/esewa.png";
-import khalti from "/payment-logo/khalti.png";
+import ProceedBookingModal from "../components/ui/ProceedBookingModal";
 
 const ProceedBooking = () => {
+  const navigate = useNavigate();
   const { user, token } = useSelector((state) => state.user);
 
   const { id } = useParams();
@@ -36,6 +35,9 @@ const ProceedBooking = () => {
   const [mobile, setMobile] = useState(user.mobile || null);
 
   const [totalPrice, setTotalPrice] = useState();
+
+  const [response, setResponse] = useState("");
+  const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
     if (from < new Date() || until < new Date()) {
@@ -75,6 +77,34 @@ const ProceedBooking = () => {
     fetchData();
   }, []);
 
+  const handleBooking = async () => {
+    try {
+      const bookingDetails = {
+        parkingLotId: parkingLot._id,
+        fromTime: JSON.stringify(from),
+        untilTime: JSON.stringify(until),
+        vehiclePlate: user.vehicle[0]?.plate,
+      };
+      const { data } = await axios.post(
+        `${BACKEND}/api/V1/booking`,
+        bookingDetails,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(data);
+      setResponse("success");
+      setOpenModal(true);
+      console.log(data, openModal, response);
+    } catch (error) {
+      console.log(error);
+      setResponse("failed");
+      setOpenModal(true);
+    }
+  };
+
   return (
     <>
       <SearchNavBar />
@@ -109,10 +139,10 @@ const ProceedBooking = () => {
                 )}
                 <ContactInfo mobile={mobile} setMobile={setMobile} />
                 <VehicleInfo
-                  brand={user.vehicle[0].brand}
-                  numberPlate={user.vehicle[0].plate}
+                  brand={user.vehicle[0]?.brand}
+                  numberPlate={user.vehicle[0]?.plate}
                 />
-                <div className="w-full p-8 flex flex-col gap-6 bg-white border border-[#dddddd] rounded-lg">
+                {/* <div className="w-full p-8 flex flex-col gap-6 bg-white border border-[#dddddd] rounded-lg">
                   <h2 className="text-[#212121] text-2xl font-medium">
                     Pay now and reserve
                   </h2>
@@ -120,14 +150,27 @@ const ProceedBooking = () => {
                     You need to pay the charges first to reserve your spot
                   </p>
                   <div className="flex items-center gap-8">
-                    <button className="bg-[#1fa637] h-[80px] font-bold text-white rounded-md cursor-pointer">
-                      <img src={esewa} alt="" className="h-[50px] w-[200px]" />
+                    <button
+                      className="bg-[#1fa637] h-[80px] font-bold text-white rounded-md cursor-pointer"
+                      onClick={handleEsewaPay}
+                    >
+                      <img src={esewa} alt="" className="h-[50px] w-[210px]" />
                     </button>
                     <button className=" text-white rounded-md cursor-pointer">
                       <img src={khalti} alt="" className="w-[250px]" />
                     </button>
                   </div>
-                </div>
+
+                  
+                </div> */}
+
+                {/* create booking button  */}
+                <button
+                  className="py-3 mb-14 text-lg bg-[#1fa637] font-bold text-white rounded-md cursor-pointer"
+                  onClick={handleBooking}
+                >
+                  Reserve your slot
+                </button>
               </div>
               {/* right parts */}
               <div className="w-[440px]">
@@ -145,6 +188,17 @@ const ProceedBooking = () => {
               </div>
             </div>
           </div>
+          {openModal && (
+            <ProceedBookingModal
+              type={response}
+              isOpen={openModal}
+              onClose={() => setOpenModal(false)}
+              onConfirm={() => {
+                setOpenModal(false);
+                navigate("/dashboard/bookings-made");
+              }}
+            />
+          )}
         </div>
       )}
     </>

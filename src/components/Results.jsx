@@ -4,6 +4,7 @@ import SearchResultCard from "./search/SearchResultCard";
 import { useNavigate } from "react-router";
 
 const Results = ({ query, results }) => {
+  console.log(results);
   const navigate = useNavigate();
   const [searchResult, setSearchResult] = useState(
     results.length > 0 ? results : search

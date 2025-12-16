@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 
 const ConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
-  if (!isOpen) return null;
   useEffect(() => {
     if (isOpen) {
       // 1. Modal is open: Add the class to disable scrolling
@@ -17,6 +16,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
       document.body.classList.remove("overflow-hidden");
     };
   }, [isOpen]);
+  if (!isOpen) return null;
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/75 transition-opacity"
