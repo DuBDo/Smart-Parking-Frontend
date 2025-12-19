@@ -19,6 +19,7 @@ import OwnerBookings from "./components/owner/booking/OwnerBookings";
 import SearchPage from "./pages/SearchPage";
 import ProceedBooking from "./pages/ProceedBooking";
 import ShowParkingLot from "./pages/ShowParkingLot";
+import MessagesPage from "./pages/MessagesPage";
 
 function App() {
   const location = useLocation();
@@ -91,6 +92,14 @@ function App() {
           element={
             <ProtectedRoute>
               <DriverProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/messages"
+          element={
+            <ProtectedRoute>
+              <MessagesPage />
             </ProtectedRoute>
           }
         />

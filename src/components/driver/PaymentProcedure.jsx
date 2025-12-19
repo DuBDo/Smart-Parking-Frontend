@@ -5,6 +5,7 @@ import { calculateDuration } from "../../utils/durationCalculator";
 import dateFormator from "../../utils/dateFormator";
 import { ShieldCheck, Clock, MapPin, CreditCard } from "lucide-react";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const PaymentProcedure = ({
   bookingId,
@@ -15,6 +16,7 @@ const PaymentProcedure = ({
   perHourCharge,
   totalCharge,
 }) => {
+  const { token } = useSelector((state) => state.user);
   const [selected, setSelected] = useState(null);
 
   const durationString = useMemo(() => {
@@ -28,30 +30,52 @@ const PaymentProcedure = ({
   const BACKEND = import.meta.env.VITE_BACKEND_URL;
 
   const handlePay = async (paymentType) => {
-    const res = await axios.post(
-      `${BACKEND}/api/V1/payment/${paymentType}/initiate`,
-      {
-        bookingId,
-        amount: totalCharge,
+    try {
+      if (paymentType == "esewa") {
+        const res = await axios.post(
+          `${BACKEND}/api/V1/payment/${paymentType}/initiate`,
+          {
+            bookingId,
+            amount: totalCharge,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const { paymentUrl, payload } = res.data;
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = paymentUrl;
+
+        Object.entries(payload).forEach(([key, value]) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = value;
+          form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
       }
-    );
+      if (paymentType == "khalti") {
+        const { data } = await axios.post(
+          `${BACKEND}/api/V1/payment/${paymentType}/initiate`,
+          { bookingId },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-    const { paymentUrl, payload } = res.data;
-
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = paymentUrl;
-
-    Object.entries(payload).forEach(([key, value]) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = key;
-      input.value = value;
-      form.appendChild(input);
-    });
-
-    document.body.appendChild(form);
-    form.submit();
+        window.location.href = data.payment_url;
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (

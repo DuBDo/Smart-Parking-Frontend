@@ -139,8 +139,8 @@ const ProceedBooking = () => {
                 )}
                 <ContactInfo mobile={mobile} setMobile={setMobile} />
                 <VehicleInfo
-                  brand={user.vehicle[0]?.brand}
-                  numberPlate={user.vehicle[0]?.plate}
+                  brand={user?.vehicle[0]?.brand}
+                  numberPlate={user?.vehicle[0]?.plate}
                 />
                 {/* <div className="w-full p-8 flex flex-col gap-6 bg-white border border-[#dddddd] rounded-lg">
                   <h2 className="text-[#212121] text-2xl font-medium">
