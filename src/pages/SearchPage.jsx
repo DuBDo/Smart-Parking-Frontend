@@ -5,6 +5,8 @@ import { useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import calculateTravelTimes from "../utils/calculateTravelTimes";
+import SearchMap from "../components/map/SearchMap";
 
 const SearchPage = () => {
   const [pageLoad, setPageLoad] = useState(false);
@@ -18,6 +20,10 @@ const SearchPage = () => {
   const startingOnDate = searchParams.get("startingon");
   const availabilityStatus = searchParams.get("availability");
   const q = searchParams.get("q");
+
+  // location
+  const [lat, setLat] = useState(searchParams.get("lat") || null);
+  const [lon, setLon] = useState(searchParams.get("lon") || null);
 
   const [from, setFrom] = useState(new Date(fromDate));
   const [until, setUntil] = useState(
@@ -45,28 +51,43 @@ const SearchPage = () => {
         };
 
   const [results, setResults] = useState([]);
+  const [mapLoading, setMaploading] = useState(false);
 
   const { token } = useSelector((state) => state.user);
   const BACKEND = import.meta.env.VITE_BACKEND_URL;
   const fetchData = async () => {
+    setMaploading(true);
     try {
-      const { data } = await axios.get(`${BACKEND}/api/V1/parking-lot`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setResults(data);
+      const { data } = await axios.get(
+        `${BACKEND}/api/V1/parking-lot?lat=${lat}&lon=${lon}&bookingType=${bookingType}&startTime=${from}&endTime=${until}&availability=${availability}&startiingOn=${startingOn}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("available lots", data.count);
+      //add travel times
+      const lotsWithTime = await calculateTravelTimes(
+        lat,
+        lon,
+        data.parkingLots
+      );
+      setResults(lotsWithTime);
     } catch (error) {
       console.log(error);
+    } finally {
+      setPageLoad(false);
+      setMaploading(false);
     }
   };
   useEffect(() => {
     fetchData();
     setPageLoad(true);
-  }, []);
+  }, [lat, lon]);
   return (
     <>
-      {pageLoad ? (
+      {!pageLoad ? (
         <div className="flex flex-col h-[100vh]">
           <SearchNavBar />
           <TopSearchFilter
@@ -84,8 +105,12 @@ const SearchPage = () => {
             setSearch={setSearch}
           />
           <div className="flex flex-1 overflow-y-scroll">
-            <Results results={results} query={queryData} />
-            <div className="bg-gray-500 flex-1">Map</div>
+            {!mapLoading && (
+              <>
+                <Results results={results} query={queryData} />
+                <SearchMap lat={lat} lon={lon} lots={results} />
+              </>
+            )}
           </div>
         </div>
       ) : (

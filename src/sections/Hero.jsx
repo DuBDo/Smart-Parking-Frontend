@@ -3,9 +3,11 @@ import { FaRegHandshake } from "react-icons/fa6";
 import { FaCar } from "react-icons/fa";
 import { IoSearch } from "react-icons/io5";
 import { IoIosArrowDown } from "react-icons/io";
+import { LuSend } from "react-icons/lu";
+import { GoHeart, GoHeartFill } from "react-icons/go";
 
 import hero from "../assets/hero.webp";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -16,12 +18,13 @@ import dayjs from "dayjs";
 import {} from "@mui/x-date-pickers/timeViewRenderers";
 import { DigitalClock } from "@mui/x-date-pickers/DigitalClock";
 import { useNavigate } from "react-router";
+import axios from "axios";
+import { Search, MapPin, Star, Clock } from "lucide-react"; // Icons
 
 function Hero() {
   const navigate = useNavigate();
   const [bookingType, setBookingType] = useState("hourly/daily");
 
-  const [search, setSearch] = useState("");
   let currentDate = dayjs();
   const [date, setDate] = useState(dayjs(currentDate));
   const [fromDateAndTime, setFromDateAndTime] = useState(dayjs(currentDate));
@@ -37,6 +40,117 @@ function Hero() {
   let fromString = fromDateAndTime.toDate().toISOString();
   let toString = untilDateAndTime.toDate().toISOString();
 
+  //search
+  const [search, setSearch] = useState("");
+  const [lat, setLat] = useState(null);
+  const [lon, setLon] = useState(null);
+  const [results, setResults] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const dropdownRef = useRef(null);
+  // Load history from localStorage on mount
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("map_history") || "[]");
+    setHistory(saved);
+
+    // Close dropdown when clicking outside
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Search API Call
+  const NEPAL_BOUNDS = "80.058,26.347,88.201,30.447";
+  const handleLocationSearch = async (val) => {
+    setSearch(val);
+    if (val.length < 3) {
+      setResults([]);
+      return;
+    }
+    try {
+      const { data } = await axios(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${val}&viewbox=${NEPAL_BOUNDS}&bounded=1&limit=5`
+      );
+      setResults(data);
+    } catch (err) {
+      console.error("Search error:", err);
+    }
+  };
+  const handleCurrentLocation = () => {
+    setIsLoading(true);
+
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      setIsLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setLat(latitude);
+        setLon(longitude);
+        try {
+          // Reverse Geocode to get a name for the search bar
+          // Using Nominatim (free) or Baato.io for Nepal specifically
+          const { data } = await axios(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const placeName = data.display_name;
+
+          // Update UI
+          setSearch(placeName);
+          setShowDropdown(false);
+        } catch (error) {
+          console.error("Error fetching location name:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      },
+      (error) => {
+        alert("Unable to retrieve your location. Please check permissions.");
+        setIsLoading(false);
+      }
+    );
+  };
+  const selectLocation = (loc, isFromHistory = false) => {
+    const { lat, lon, display_name } = loc;
+    setLat(lat);
+    setLon(lon);
+    if (!isFromHistory) {
+      const newEntry = { ...loc, isFavorite: false, timestamp: Date.now() };
+      const updatedHistory = [
+        newEntry,
+        ...history.filter((h) => h.place_id !== loc.place_id),
+      ].slice(0, 10);
+      setHistory(updatedHistory);
+      localStorage.setItem("map_history", JSON.stringify(updatedHistory));
+    }
+
+    setSearch(display_name);
+    setShowDropdown(false);
+  };
+
+  const toggleFavorite = (e, placeId) => {
+    e.stopPropagation();
+    const updated = history.map((item) =>
+      item.place_id === placeId
+        ? { ...item, isFavorite: !item.isFavorite }
+        : item
+    );
+    setHistory(updated);
+    localStorage.setItem("map_history", JSON.stringify(updated));
+  };
+  // Sort history: Favorites first, then by timestamp
+  const sortedHistory = [...history].sort(
+    (a, b) => b.isFavorite - a.isFavorite
+  );
+
   useEffect(() => {
     setUntilDateAndTime(dayjs(fromDateAndTime.add(1, "hour")));
   }, [fromDateAndTime]);
@@ -44,6 +158,8 @@ function Hero() {
   const handleSearch = () => {
     const searchData = {
       q: search,
+      lat,
+      lon,
       bookingtype: bookingType,
     };
     if (bookingType == "monthly") {
@@ -113,7 +229,7 @@ function Hero() {
                 Monthly
               </button>
               {/* Search Bar */}
-              <div className="mt-5 border border-[#cccccc] rounded w-full flex justify-between items-center pl-4 py-2">
+              <div className=" relative mt-5 border border-[#cccccc] rounded w-full flex justify-between items-center pl-4 py-2">
                 <div className="flex flex-col grow">
                   <label htmlFor="search" className="text-[#1fa637] text-base">
                     Park at
@@ -122,7 +238,9 @@ function Hero() {
                     type="text"
                     id="search"
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    autoComplete="off"
+                    onFocus={() => setShowDropdown(true)}
+                    onChange={(e) => handleLocationSearch(e.target.value)}
                     placeholder="Enter a place"
                     className="w-full h-6 font-medium focus:outline-0"
                   />
@@ -130,7 +248,80 @@ function Hero() {
                 <div className="w-14 h-7 flex justify-center items-center">
                   <IoSearch size={25} className="text-[#cccccc]" />
                 </div>
+                {/* Dropdown Logic */}
+                {showDropdown && (
+                  <div className=" absolute top-18 left-0 w-full z-10 px-4 rounded border bg-white border-[#efefef] max-h-80 overflow-y-auto shadow-lg">
+                    <div
+                      className="flex items-center gap-5 py-4 border-b border-b-[#efefef] text-lg  cursor-pointer"
+                      onClick={handleCurrentLocation}
+                      disabled={isLoading}
+                    >
+                      <LuSend size={22} className="text-[#212121]" />
+                      <div className="text-[#212121]">
+                        {isLoading ? "Locating..." : "Use current location"}
+                      </div>
+                    </div>
+                    {/* Show Results if typing, else show History */}
+                    {search.length >= 3 && results.length > 0 ? (
+                      results.map((res) => (
+                        <button
+                          key={res.place_id}
+                          onClick={() => selectLocation(res)}
+                          className="w-full text-left py-3 hover:bg-blue-50 flex items-start gap-3 transition"
+                        >
+                          <MapPin className="text-[#3685d4] w-5 h-5 mt-1 shrink-0" />
+                          <span className="text-base text-gray-600 truncate">
+                            {res.display_name}
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <>
+                        <p className="text-[#7e7e7e] font-semibold text-sm mt-4">
+                          Recent searches
+                        </p>
+                        {sortedHistory.map((item) => (
+                          <button
+                            key={item.place_id}
+                            onClick={() => selectLocation(item, true)}
+                            className="w-full text-left py-3 hover:bg-gray-50 flex items-center justify-between group transition"
+                          >
+                            <div className="flex flex-1 items-center gap-3 truncate">
+                              <span className="text text-gray-600 truncate">
+                                {item.display_name}
+                              </span>
+                            </div>
+                            {item.isFavorite ? (
+                              <GoHeartFill
+                                onClick={(e) =>
+                                  toggleFavorite(e, item.place_id)
+                                }
+                                size={25}
+                                className="cursor-pointe text-[#1fa637] cursor-pointer"
+                              />
+                            ) : (
+                              <GoHeart
+                                onClick={(e) =>
+                                  toggleFavorite(e, item.place_id)
+                                }
+                                size={25}
+                                className="cursor-pointe text-gray-300 cursor-pointer"
+                              />
+                            )}
+                          </button>
+                        ))}
+                      </>
+                    )}
+
+                    {/* {search.length < 3 && history.length === 0 && (
+                    <div className="p-8 text-center text-gray-400 text-sm">
+                      Search for a place to see recent history.
+                    </div>
+                  )} */}
+                  </div>
+                )}
               </div>
+
               <div className="w-full flex flex-col">
                 {bookingType == "monthly" ? (
                   <div className="flex flex-col md:flex-row md:items-end gap-4">

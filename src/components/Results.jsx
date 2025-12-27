@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { search } from "../constants/universal";
 import SearchResultCard from "./search/SearchResultCard";
 import { useNavigate } from "react-router";
@@ -6,15 +6,17 @@ import { useNavigate } from "react-router";
 const Results = ({ query, results }) => {
   console.log(results);
   const navigate = useNavigate();
-  const [searchResult, setSearchResult] = useState(
-    results.length > 0 ? results : search
-  );
+  const [searchResult, setSearchResult] = useState([]);
 
   const filterTabs = ["cheapest", "closest"];
   const [searchType, setSearchType] = useState("cheapest");
 
   const params = new URLSearchParams(query);
   const q = params.toString();
+
+  useEffect(() => {
+    setSearchResult(results);
+  }, [results]);
 
   const handleCardClicked = (id) => {
     navigate(`/lot/${id}?${q}`);
@@ -55,12 +57,12 @@ const Results = ({ query, results }) => {
               id={lot._id}
               name={lot.name}
               address={lot.address}
-              image={lot.image[0]}
+              image={lot.images[0]}
               rating={lot.avgRating}
               totalRatings={lot.totalRatings}
               totalBookings={lot.totalBookings}
-              durationToDestination={lot.duration}
-              price={lot.price}
+              durationToDestination={lot.travelTime}
+              price={lot.pricePerHour}
               evCharger={lot.evCharger}
               onReserve={handleBooking}
               onClick={() => {

@@ -2,178 +2,114 @@ import DashboardSideBar from "../components/DashboardSideBar";
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import noBookingsImage from "/booking/no-bookings-found.png";
-import Pagination from "../components/driver/Pagination";
-import BookingCard from "../components/driver/BookingCard";
+import noMessagesImage from "/messages/no-messages.png";
 import { useSocket } from "../utils/SocketContext";
 import Spinner from "../components/ui/Spinner";
-import PaymentProcedure from "../components/driver/PaymentProcedure";
-import { useSearchParams } from "react-router";
-import PaymentStatusModal from "../components/driver//modal/PaymentStatusModal";
+import ChatList from "../components/chat/ChatList";
+import ChatRoom from "../components/chat/ChatRoom";
+import { useSearchParams } from "react-router-dom";
 
 const MessagesPage = () => {
-  const [params] = useSearchParams();
-  const paymentResponse = params.get("status");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get("tab") || "booked";
 
-  const [paymentModal, setPaymentModal] = useState(paymentResponse || "");
-  const [openPaymentModal, setOpenPaymentModal] = useState(
-    paymentModal == "" ? false : true
-  );
-
-  const { socket, isConnected } = useSocket();
-  const { token } = useSelector((state) => state.user);
+  const [chats, setChats] = useState([]);
+  // for all messages
   const BACKEND = import.meta.env.VITE_BACKEND_URL;
 
-  const tabs = ["pending", "in-progress", "upcoming", "past"];
-  const [selectedTab, setSelectedTab] = useState("pending");
+  const { user, token } = useSelector((state) => state.user);
+  const { socket } = useSocket();
+  const tabs = ["booked", "enquiry", "past"];
+  const [selectedTab, setSelectedTab] = useState(tab);
+
+  const [activeRoom, setActiveRoom] = useState(null); //chatRoom._id
+  const [receiverId, setReceiverId] = useState(null); //chatRoom.driver/owner._id
+  const [bookingId, setBoookingId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const [totalCounts, setTotalCounts] = useState(0);
+  const [bookedNotification, setBookedNotification] = useState([]);
+  const [enquiryNotification, setEnquiryNotification] = useState([]);
+  const [pastNotification, setPastNotification] = useState([]);
 
-  const [bookings, setBookings] = useState([]);
-  const [query, setQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const pageSize = 3;
-
-  const [proceedPayment, setProceedPayment] = useState(false);
-  const [chosenBookingToPay, setChosenBookingToPay] = useState(null);
-
-  const fetchData = useCallback(async () => {
+  const fetchData = async () => {
     setLoading(true);
     if (!socket) return;
     try {
       const { data } = await axios.get(
-        `${BACKEND}/api/V1/booking/${selectedTab}`,
-        {
-          params: {
-            limit: pageSize,
-            skip: (page - 1) * pageSize,
-            q: query,
-          },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `${import.meta.env.VITE_BACKEND_URL}/api/V1/chat/list?userId=${
+          user._id
+        }&tab=${selectedTab}`
       );
-      console.log(data);
-      setBookings(data.bookings);
-      setTotalCounts(data.counts ?? (data.bookings || []).length);
+
+      setChats(data);
     } catch (error) {
       console.error(error);
-      setError(error.message || "Fetch error");
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedTab, page, query]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-  // useEffect(() => {
-  //   fetchData();
-  // }, [selectedTab, totalCounts, page]);
-
-  //Setting-up Socket-Listeners
-  useEffect(() => {
-    if (!socket) return;
-
-    const events = [
-      "booking:created",
-      "booking:confirmed",
-      "booking:rejected",
-      "booking:inProgress",
-      "booking:entered",
-      "booking:exited",
-      "booking:autoCancelled",
-      "booking:completed",
-      "booking:cancelled",
-      "booking:updated",
-    ];
-
-    const refresh = () => fetchData();
-
-    events.forEach((event) => {
-      socket.on(event, refresh);
-    });
-
-    return () => {
-      events.forEach((event) => socket.off(event, refresh));
-    };
-  }, [socket]);
-
-  const onCancel = async (booking) => {
-    setLoading(true);
-    try {
-      const res = await axios.delete(
-        `${BACKEND}/api/V1/booking/${booking._id}/cancel`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      fetchData();
-    } catch (err) {
-      console.log(error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, [selectedTab]);
+
+  const handleClick = (clickedTab) => {
+    setActiveRoom(null);
+    setChats([]);
+    setSelectedTab(clickedTab);
+    setSearchParams({ tab: clickedTab });
+    if (clickedTab === selectedTab) {
+      fetchData();
+    }
+  };
+  useEffect(() => {
+    console.log(bookedNotification);
+  }, [bookedNotification]);
+  //Setting-up Socket-Listeners
   return (
     <>
       <div className="flex">
         <DashboardSideBar />
-        <div className="bg-[#f8fbfb] py-8 flex-1 px-52">
-          <h1 className="font-medium text-lg">My Bookings</h1>
+        <div className="bg-[#f8fbfb] py-8 flex-1 px-44">
+          <h1 className="font-medium text-lg">Messages</h1>
+          <p className="mt-3 text-sm text-[#212121]">
+            Please try to reply to all messages as soon as possible. No one
+            wants to be left hanging.
+          </p>
           <div className="flex w-full pt-3 text-md font-semibold border-b border-[#e5e5e5]">
             <div
-              className={`w-32 text-center py-3 h-auto cursor-pointer ${
-                selectedTab === "pending"
+              className={`w-32 text-center relative py-3 h-auto cursor-pointer ${
+                selectedTab === "booked"
                   ? "text-[#212121] border-b-4"
                   : "text-[#9e9e9e]"
               }`}
               onClick={() => {
-                setSelectedTab("pending");
-                setPage(1);
-                setBookings([]);
-                fetchData();
+                handleClick("booked");
               }}
             >
-              Pending
+              Booked
+              {
+                (bookedNotification.length = 0 && (
+                  <span className="absolute top-0 right-0 h-10 w-10 rounded-full">
+                    {bookedNotification.length}
+                  </span>
+                ))
+              }
             </div>
+
             <div
               className={`w-32 text-center py-3 h-auto cursor-pointer ${
-                selectedTab === "in-progress"
+                selectedTab === "enquiry"
                   ? "text-[#212121] border-b-4"
                   : "text-[#9e9e9e]"
               }`}
               onClick={() => {
-                setProceedPayment(false);
-                setSelectedTab("in-progress");
-                setPage(1);
-                setBookings([]);
-                fetchData();
+                handleClick("enquiry");
               }}
             >
-              In progress
+              Enquiries
             </div>
-            <div
-              className={`w-32 text-center py-3 h-auto cursor-pointer ${
-                selectedTab === "upcoming"
-                  ? "text-[#212121] border-b-4"
-                  : "text-[#9e9e9e]"
-              }`}
-              onClick={() => {
-                setProceedPayment(false);
-                setSelectedTab("upcoming");
-                setPage(1);
-                // setBookings([]);
-                fetchData();
-              }}
-            >
-              Upcoming
-            </div>
+
             <div
               className={`w-32 text-center py-3 h-auto cursor-pointer ${
                 selectedTab === "past"
@@ -181,11 +117,7 @@ const MessagesPage = () => {
                   : "text-[#9e9e9e]"
               }`}
               onClick={() => {
-                setProceedPayment(false);
-                setSelectedTab("past");
-                setPage(1);
-                // setBookings([]);
-                fetchData();
+                handleClick("past");
               }}
             >
               Past
@@ -193,78 +125,41 @@ const MessagesPage = () => {
           </div>
 
           {/* displaySection */}
-          <div className="w-full h-[660px] my-9 px-3 py-3 border border-[#e5e5e5] rounded">
-            {!bookings?.length > 0 && !loading && !proceedPayment ? (
-              <div className="flex flex-col  h-[660px] justify-center items-center">
-                <img src={noBookingsImage} alt="" className="w-42 h-42 " />
-                <h2 className="text-xl text-[#999999] font-medium mt-4 mb-2">
-                  No bookings found
-                </h2>
-                <p className="text-base text-[#999999]">
-                  {selectedTab == "in-progress"
-                    ? "In progress"
-                    : selectedTab == "upcoming"
-                    ? "Upcoming"
-                    : "Past"}{" "}
-                  bookings will appear here
-                </p>
-              </div>
-            ) : (
-              !loading &&
-              bookings.length > 0 &&
-              !proceedPayment && (
-                <div className="max-w-full max-h-[660px] flex flex-col gap-3 mx-3 my-3">
-                  {bookings.map((b) => (
-                    <BookingCard
-                      key={b._id}
-                      setProceedPayment={setProceedPayment}
-                      choseBooking={setChosenBookingToPay}
-                      booking={b}
-                      onCancel={onCancel}
-                    />
-                  ))}
-                </div>
-              )
-            )}
-            {/* Pagination */}
-            {!loading && !proceedPayment && bookings?.length > 0 && (
-              <Pagination
-                page={page}
-                setPage={setPage}
-                total={totalCounts}
-                pageSize={pageSize}
-              />
-            )}
-            {/* loading */}
-            {loading && <Spinner />}
-            {/* payment */}
-
-            {proceedPayment && (
-              <div className="h-full">
-                <PaymentProcedure
-                  bookingId={chosenBookingToPay._id}
-                  name={chosenBookingToPay.parkingLotId.name}
-                  address={chosenBookingToPay.parkingLotId.address}
-                  fromTime={chosenBookingToPay.startTime}
-                  untilTime={chosenBookingToPay.endTime}
-                  perHourCharge={chosenBookingToPay.pricePerHour}
-                  totalCharge={chosenBookingToPay.totalPrice}
+          <div className="w-full h-[540px] flex gap-3 my-9 px-3 py-3 border border-[#e5e5e5] rounded overflow-hidden">
+            {!loading ? (
+              <>
+                {" "}
+                <ChatList
+                  userId={user._id}
+                  role={user.role}
+                  chats={chats}
+                  tab={selectedTab}
+                  activeRoom={activeRoom}
+                  setActiveRoom={setActiveRoom}
+                  setReceiverId={setReceiverId}
+                  setBoookingId={setBoookingId}
                 />
-              </div>
+                <ChatRoom
+                  activeTab={selectedTab}
+                  chatRoomId={activeRoom}
+                  userId={user._id}
+                  receiverId={receiverId}
+                  bookingId={bookingId}
+                  bookedNotification={bookedNotification}
+                  setBookedNotification={setBookedNotification}
+                  enquiryNotification={enquiryNotification}
+                  setEnquiryNotification={setEnquiryNotification}
+                  pastNotification={pastNotification}
+                  setPastNotification={setPastNotification}
+                  fetchChats={fetchData}
+                />
+              </>
+            ) : (
+              <Spinner />
             )}
           </div>
         </div>
       </div>
-      {paymentModal != "" && openPaymentModal && (
-        <PaymentStatusModal
-          isOpen={openPaymentModal}
-          status={paymentModal}
-          onClose={() => {
-            setPaymentModal("");
-            setOpenPaymentModal(false);
-          }}
-        />
-      )}
     </>
   );
 };

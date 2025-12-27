@@ -71,7 +71,7 @@ export const search = [
     name: "Buspark Parking",
     // woner
     address: "Lalitpur",
-    image: [
+    images: [
       "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
     ],
     evCharger: true,
@@ -87,7 +87,7 @@ export const search = [
     name: "Buspark Parking",
     // woner
     address: "Lalitpur",
-    image: [
+    images: [
       "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
     ],
     evCharger: true,
@@ -103,7 +103,7 @@ export const search = [
     name: "Buspark Parking",
     // woner
     address: "Lalitpur",
-    image: [
+    images: [
       "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
     ],
     evCharger: true,
@@ -119,7 +119,7 @@ export const search = [
     name: "Buspark Parking",
     // woner
     address: "Lalitpur",
-    image: [
+    images: [
       "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
     ],
     evCharger: true,
@@ -135,7 +135,7 @@ export const search = [
     name: "Buspark Parking",
     // woner
     address: "Lalitpur",
-    image: [
+    images: [
       "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
     ],
     evCharger: true,
@@ -151,7 +151,7 @@ export const search = [
     name: "Buspark Parking",
     // woner
     address: "Lalitpur",
-    image: [
+    images: [
       "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
     ],
     evCharger: true,
@@ -167,7 +167,7 @@ export const search = [
     name: "Buspark Parking",
     // woner
     address: "Lalitpur",
-    image: [
+    images: [
       "https://res.cloudinary.com/dyuiuodct/image/upload/v1763802241/fj8cywxqs6ulbkzdwzfw.png",
     ],
     evCharger: true,

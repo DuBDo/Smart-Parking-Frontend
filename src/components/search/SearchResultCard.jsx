@@ -1,5 +1,5 @@
 import { Star, ShieldCheck, Zap } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useEffect } from "react";
 
 export default function ParkingCard({
   id,
@@ -15,6 +15,16 @@ export default function ParkingCard({
   onReserve,
   onClick,
 }) {
+  console.log(id);
+  console.log(image);
+  console.log(name);
+  console.log(rating);
+  console.log(totalRatings);
+  console.log(totalBookings);
+  console.log(address);
+  console.log(durationToDestination);
+  console.log(price);
+  console.log(evCharger);
   return (
     <div
       className="flex w-full max-w-xl bg-white rounded-xl shadow border border-[#ccc] overflow-hidden cursor-pointer"
@@ -80,8 +90,8 @@ export default function ParkingCard({
           {/* EV charger + duration */}
           <div className="text-[14px] mt-1 flex items-center gap-3">
             <p className="text-black">
-              <span className="font-medium ">{durationToDestination}</span> to
-              destination
+              <span className="font-medium ">{durationToDestination} mins</span>{" "}
+              to destination
             </p>
 
             {/* EV */}

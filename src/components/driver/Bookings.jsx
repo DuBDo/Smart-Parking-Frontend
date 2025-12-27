@@ -8,14 +8,14 @@ import BookingCard from "./BookingCard";
 import { useSocket } from "../../utils/SocketContext";
 import Spinner from "../../components/ui/Spinner";
 import PaymentProcedure from "./PaymentProcedure";
-import { useSearchParams } from "react-router";
+import { useSearchParams } from "react-router-dom";
 import PaymentStatusModal from "./modal/PaymentStatusModal";
 
 const Bookings = () => {
-  const [params] = useSearchParams();
-  const paymentResponse = params.get("status");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paymentResponse = searchParams.get("status") || "";
 
-  const [paymentModal, setPaymentModal] = useState(paymentResponse || "");
+  const [paymentModal, setPaymentModal] = useState(paymentResponse);
   const [openPaymentModal, setOpenPaymentModal] = useState(
     paymentModal == "" ? false : true
   );
