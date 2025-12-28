@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const DatePicker = ({
@@ -9,11 +9,12 @@ const DatePicker = ({
   minOffsetHours = 0, // default 0, but you can pass 2 for +2 hrs rule
 }) => {
   const now = new Date();
+  const pickerRef = useRef(null);
 
   // Minimum selectable date-time
   const minDateTime = new Date(now.getTime() + minOffsetHours * 60 * 60 * 1000);
 
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(value);
 
   const [currentMonth, setCurrentMonth] = useState(now.getMonth());
   const [currentYear, setCurrentYear] = useState(now.getFullYear());
@@ -24,6 +25,16 @@ const DatePicker = ({
     (new Date(currentYear, currentMonth, 1).getDay() + 6) % 7;
 
   const weekDays = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+        setShowPicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [setShowPicker]);
 
   // Check if a date should be disabled
   const isDateDisabled = (day) => {
@@ -40,8 +51,6 @@ const DatePicker = ({
 
   // Done button handler
   const handleDone = () => {
-    if (!selectedDate) return;
-
     const final = new Date(selectedDate);
 
     onChange(final);
@@ -69,6 +78,7 @@ const DatePicker = ({
 
   return (
     <div
+      ref={pickerRef}
       className={`w-[280px] rounded shadow absolute z-50 top-full right-0
       }`}
       onClick={(e) => e.stopPropagation()}
@@ -115,6 +125,11 @@ const DatePicker = ({
             const day = i + 1;
             const disabled = isDateDisabled(day);
 
+            const isToday =
+              day === now.getDate() &&
+              currentMonth === now.getMonth() &&
+              currentYear === now.getFullYear();
+
             const isSelected =
               selectedDate &&
               selectedDate.getDate() === day &&
@@ -132,6 +147,7 @@ const DatePicker = ({
                     : "hover:bg-[#1fa637] "
                 }
                 ${isSelected ? "bg-[#1fa637] text-white" : ""}
+                ${isToday ? "border border-[#1fa637]" : ""}
               `}
               >
                 {day}

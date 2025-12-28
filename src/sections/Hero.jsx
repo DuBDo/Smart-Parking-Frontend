@@ -8,6 +8,7 @@ import { GoHeart, GoHeartFill } from "react-icons/go";
 
 import hero from "../assets/hero.webp";
 import { useEffect, useRef, useState } from "react";
+import { geocoding } from "@maptiler/sdk";
 
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -49,10 +50,11 @@ function Hero() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const dropdownRef = useRef(null);
+  const [disableSearch, setDisableSearch] = useState(true);
   // Load history from localStorage on mount
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("map_history") || "[]");
-    setHistory(saved);
+    setHistory(Array.isArray(saved) ? saved : []);
 
     // Close dropdown when clicking outside
     const handleClickOutside = (e) => {
@@ -65,18 +67,23 @@ function Hero() {
   }, []);
 
   // Search API Call
-  const NEPAL_BOUNDS = "80.058,26.347,88.201,30.447";
+  const NEPAL_BOUNDS = [80.058, 26.347, 88.201, 30.447];
   const handleLocationSearch = async (val) => {
     setSearch(val);
-    if (val.length < 3) {
+    if (val.length < 2) {
       setResults([]);
+      setDisableSearch(true);
       return;
     }
     try {
-      const { data } = await axios(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${val}&viewbox=${NEPAL_BOUNDS}&bounded=1&limit=5`
-      );
-      setResults(data);
+      const result = await geocoding.forward(val, {
+        bbox: NEPAL_BOUNDS,
+        limit: 6,
+        autocomplete: true, // Optimizes for typing
+        fuzzyMatch: true, // Helps with typos
+        types: ["poi", "address", "municipality", "locality", "neighbourhood"],
+      });
+      setResults(result.features || []);
     } catch (err) {
       console.error("Search error:", err);
     }
@@ -97,51 +104,63 @@ function Hero() {
         setLon(longitude);
         try {
           // Reverse Geocode to get a name for the search bar
-          // Using Nominatim (free) or Baato.io for Nepal specifically
-          const { data } = await axios(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-          );
-          const placeName = data.display_name;
-
-          // Update UI
-          setSearch(placeName);
+          // Use MapTiler SDK instead of Axios/Nominatim
+          const result = await geocoding.reverse([longitude, latitude], {
+            limit: 1,
+            types: ["poi", "address", "neighbourhood", "locality"],
+          });
+          console.log(result);
+          if (result.features && result.features.length > 0) {
+            // feature_name or place_name gives a more concise label than Nominatim's massive string
+            const placeName = result.features[0].place_name;
+            setSearch(placeName);
+          }
+          setDisableSearch(false);
           setShowDropdown(false);
         } catch (error) {
           console.error("Error fetching location name:", error);
+          setSearch(
+            `Location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+          );
         } finally {
           setIsLoading(false);
         }
       },
-      (error) => {
+      () => {
         alert("Unable to retrieve your location. Please check permissions.");
         setIsLoading(false);
       }
     );
   };
   const selectLocation = (loc, isFromHistory = false) => {
-    const { lat, lon, display_name } = loc;
+    const [lon, lat] = loc.geometry.coordinates;
+    const name = loc.place_name || loc.display_name;
     setLat(lat);
     setLon(lon);
+    setSearch(name);
+    setDisableSearch(false);
+    setShowDropdown(false);
     if (!isFromHistory) {
-      const newEntry = { ...loc, isFavorite: false, timestamp: Date.now() };
+      const newEntry = {
+        id: loc.id,
+        place_name: name,
+        geometry: loc.geometry,
+        isFavorite: false,
+        timestamp: Date.now(),
+      };
       const updatedHistory = [
         newEntry,
-        ...history.filter((h) => h.place_id !== loc.place_id),
+        ...history.filter((h) => h.id !== loc.id),
       ].slice(0, 10);
       setHistory(updatedHistory);
       localStorage.setItem("map_history", JSON.stringify(updatedHistory));
     }
-
-    setSearch(display_name);
-    setShowDropdown(false);
   };
 
-  const toggleFavorite = (e, placeId) => {
+  const toggleFavorite = (e, id) => {
     e.stopPropagation();
     const updated = history.map((item) =>
-      item.place_id === placeId
-        ? { ...item, isFavorite: !item.isFavorite }
-        : item
+      item.id === id ? { ...item, isFavorite: !item.isFavorite } : item
     );
     setHistory(updated);
     localStorage.setItem("map_history", JSON.stringify(updated));
@@ -164,7 +183,7 @@ function Hero() {
     };
     if (bookingType == "monthly") {
       searchData.startingon = date.toDate().toISOString();
-      searchData.availabilty = availability;
+      searchData.availability = availability;
     }
     if (bookingType === "hourly/daily") {
       searchData.from = fromDateAndTime.toDate().toISOString();
@@ -229,7 +248,10 @@ function Hero() {
                 Monthly
               </button>
               {/* Search Bar */}
-              <div className=" relative mt-5 border border-[#cccccc] rounded w-full flex justify-between items-center pl-4 py-2">
+              <div
+                ref={dropdownRef}
+                className=" relative mt-5 border border-[#cccccc] rounded w-full flex justify-between items-center pl-4 py-2"
+              >
                 <div className="flex flex-col grow">
                   <label htmlFor="search" className="text-[#1fa637] text-base">
                     Park at
@@ -242,7 +264,7 @@ function Hero() {
                     onFocus={() => setShowDropdown(true)}
                     onChange={(e) => handleLocationSearch(e.target.value)}
                     placeholder="Enter a place"
-                    className="w-full h-6 font-medium focus:outline-0"
+                    className="w-full h-6 font-medium placeholder-[#cccccc] focus:outline-0"
                   />
                 </div>
                 <div className="w-14 h-7 flex justify-center items-center">
@@ -262,16 +284,21 @@ function Hero() {
                       </div>
                     </div>
                     {/* Show Results if typing, else show History */}
-                    {search.length >= 3 && results.length > 0 ? (
+                    {search.length >= 2 && results.length > 0 ? (
                       results.map((res) => (
                         <button
-                          key={res.place_id}
+                          key={res.id}
                           onClick={() => selectLocation(res)}
                           className="w-full text-left py-3 hover:bg-blue-50 flex items-start gap-3 transition"
                         >
                           <MapPin className="text-[#3685d4] w-5 h-5 mt-1 shrink-0" />
                           <span className="text-base text-gray-600 truncate">
-                            {res.display_name}
+                            {res.place_name ||
+                              place_name_en
+                                .split(",")
+                                .map((part) => part.trim())
+                                .slice(0, 3)
+                                .join(", ")}
                           </span>
                         </button>
                       ))
@@ -280,44 +307,37 @@ function Hero() {
                         <p className="text-[#7e7e7e] font-semibold text-sm mt-4">
                           Recent searches
                         </p>
-                        {sortedHistory.map((item) => (
-                          <button
-                            key={item.place_id}
-                            onClick={() => selectLocation(item, true)}
-                            className="w-full text-left py-3 hover:bg-gray-50 flex items-center justify-between group transition"
-                          >
-                            <div className="flex flex-1 items-center gap-3 truncate">
-                              <span className="text text-gray-600 truncate">
-                                {item.display_name}
-                              </span>
-                            </div>
-                            {item.isFavorite ? (
-                              <GoHeartFill
-                                onClick={(e) =>
-                                  toggleFavorite(e, item.place_id)
-                                }
-                                size={25}
-                                className="cursor-pointe text-[#1fa637] cursor-pointer"
-                              />
-                            ) : (
-                              <GoHeart
-                                onClick={(e) =>
-                                  toggleFavorite(e, item.place_id)
-                                }
-                                size={25}
-                                className="cursor-pointe text-gray-300 cursor-pointer"
-                              />
-                            )}
-                          </button>
-                        ))}
+                        {sortedHistory.map((item) => {
+                          if (!item.place_name) return null;
+                          return (
+                            <button
+                              key={item.id}
+                              onClick={() => selectLocation(item, true)}
+                              className="w-full text-left py-3 hover:bg-gray-50 flex items-center justify-between group transition"
+                            >
+                              <div className="flex flex-1 items-center gap-3 truncate">
+                                <span className="text text-gray-600 truncate">
+                                  {item.place_name}
+                                </span>
+                              </div>
+                              {item.isFavorite ? (
+                                <GoHeartFill
+                                  onClick={(e) => toggleFavorite(e, item.id)}
+                                  size={25}
+                                  className="cursor-pointe text-[#1fa637] cursor-pointer"
+                                />
+                              ) : (
+                                <GoHeart
+                                  onClick={(e) => toggleFavorite(e, item.id)}
+                                  size={25}
+                                  className="cursor-pointe text-gray-300 cursor-pointer"
+                                />
+                              )}
+                            </button>
+                          );
+                        })}
                       </>
                     )}
-
-                    {/* {search.length < 3 && history.length === 0 && (
-                    <div className="p-8 text-center text-gray-400 text-sm">
-                      Search for a place to see recent history.
-                    </div>
-                  )} */}
                   </div>
                 )}
               </div>
@@ -498,7 +518,12 @@ function Hero() {
                 {/* Button */}
                 <div className="mt-6">
                   <button
-                    className="w-full cursor-pointer bg-primary text-white bg-[#1fa637] py-4 rounded-lg font-semibold flex justify-center items-center gap-2 hover:bg-[#09d250] transition"
+                    disabled={disableSearch}
+                    className={`w-full  bg-primary text-white bg-[#1fa637] py-4 rounded-lg font-semibold flex justify-center items-center gap-2 hover:bg-[#09d250] transition ${
+                      disableSearch
+                        ? "cursor-not-allowed bg-[#09d250]"
+                        : "cursor-pointer"
+                    }`}
                     onClick={handleSearch}
                   >
                     Show parking spaces

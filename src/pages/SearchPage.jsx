@@ -9,8 +9,6 @@ import calculateTravelTimes from "../utils/calculateTravelTimes";
 import SearchMap from "../components/map/SearchMap";
 
 const SearchPage = () => {
-  const [pageLoad, setPageLoad] = useState(false);
-
   const [searchParams] = useSearchParams();
 
   const bookingType = searchParams.get("bookingtype");
@@ -20,10 +18,13 @@ const SearchPage = () => {
   const startingOnDate = searchParams.get("startingon");
   const availabilityStatus = searchParams.get("availability");
   const q = searchParams.get("q");
-
   // location
-  const [lat, setLat] = useState(searchParams.get("lat") || null);
-  const [lon, setLon] = useState(searchParams.get("lon") || null);
+  const [lat, setLat] = useState(
+    searchParams.get("lat") ? Number(searchParams.get("lat")) : null
+  );
+  const [lon, setLon] = useState(
+    searchParams.get("lon") ? Number(searchParams.get("lon")) : null
+  );
 
   const [from, setFrom] = useState(new Date(fromDate));
   const [until, setUntil] = useState(
@@ -32,7 +33,7 @@ const SearchPage = () => {
   const [startingOn, setStartingOn] = useState(
     new Date(startingOnDate) ?? new Date()
   );
-  const [availability, setAvailability] = useState(availabilityStatus || "");
+  const [availability, setAvailability] = useState(availabilityStatus);
   const [search, setSearch] = useState(q || "");
 
   const queryData =
@@ -51,12 +52,14 @@ const SearchPage = () => {
         };
 
   const [results, setResults] = useState([]);
-  const [mapLoading, setMaploading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [hovered, setHovered] = useState(null);
 
   const { token } = useSelector((state) => state.user);
   const BACKEND = import.meta.env.VITE_BACKEND_URL;
-  const fetchData = async () => {
-    setMaploading(true);
+  const fetchData = async (lat, lon) => {
+    if (!lat || !lon) return;
+    setLoading(true);
     try {
       const { data } = await axios.get(
         `${BACKEND}/api/V1/parking-lot?lat=${lat}&lon=${lon}&bookingType=${bookingType}&startTime=${from}&endTime=${until}&availability=${availability}&startiingOn=${startingOn}`,
@@ -77,45 +80,55 @@ const SearchPage = () => {
     } catch (error) {
       console.log(error);
     } finally {
-      setPageLoad(false);
-      setMaploading(false);
+      setLoading(false);
     }
   };
+
   useEffect(() => {
-    fetchData();
-    setPageLoad(true);
-  }, [lat, lon]);
+    if (lat === null || lon === null) return;
+    fetchData(lat, lon);
+  }, [lon]); //using only lon instead of both lat and lng
+
   return (
     <>
-      {!pageLoad ? (
-        <div className="flex flex-col h-[100vh]">
-          <SearchNavBar />
-          <TopSearchFilter
-            setResults={setResults}
-            type={bookingType}
-            from={from}
-            setFrom={setFrom}
-            until={until}
-            setUntil={setUntil}
-            startingOn={startingOn}
-            setStartingOn={setStartingOn}
-            availability={availability}
-            setAvailability={setAvailability}
-            search={search}
-            setSearch={setSearch}
+      <div className="flex flex-col h-[100vh]">
+        <SearchNavBar />
+
+        <TopSearchFilter
+          // setSearchResults={setResults}
+          type={bookingType}
+          from={from}
+          setFrom={setFrom}
+          until={until}
+          setUntil={setUntil}
+          startingOn={startingOn}
+          setStartingOn={setStartingOn}
+          availability={availability}
+          setAvailability={setAvailability}
+          search={search}
+          setSearch={setSearch}
+          onSearch={fetchData}
+        />
+
+        <div className="flex flex-1 overflow-hidden">
+          <Results
+            loading={loading}
+            results={results}
+            query={queryData}
+            setHovered={setHovered}
           />
-          <div className="flex flex-1 overflow-y-scroll">
-            {!mapLoading && (
-              <>
-                <Results results={results} query={queryData} />
-                <SearchMap lat={lat} lon={lon} lots={results} />
-              </>
-            )}
-          </div>
+          {!loading && lat !== null && lon !== null && (
+            <SearchMap
+              lat={lat}
+              lon={lon}
+              setLat={setLat}
+              setLng={setLon}
+              lots={results}
+              hovered={hovered}
+            />
+          )}
         </div>
-      ) : (
-        ""
-      )}
+      </div>
     </>
   );
 };

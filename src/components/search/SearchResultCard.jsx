@@ -1,5 +1,4 @@
 import { Star, ShieldCheck, Zap } from "lucide-react";
-import { useEffect } from "react";
 
 export default function ParkingCard({
   id,
@@ -14,21 +13,14 @@ export default function ParkingCard({
   evCharger,
   onReserve,
   onClick,
+  setHovered,
 }) {
-  console.log(id);
-  console.log(image);
-  console.log(name);
-  console.log(rating);
-  console.log(totalRatings);
-  console.log(totalBookings);
-  console.log(address);
-  console.log(durationToDestination);
-  console.log(price);
-  console.log(evCharger);
   return (
     <div
-      className="flex w-full max-w-xl bg-white rounded-xl shadow border border-[#ccc] overflow-hidden cursor-pointer"
+      className="flex w-[370px] bg-white rounded-xl shadow border border-[#ccc] overflow-hidden cursor-pointer"
       onClick={onClick}
+      onMouseEnter={() => setHovered(id)}
+      onMouseLeave={() => setHovered(null)}
     >
       {/* Left image */}
       <div className="w-[30%] h-full">
@@ -82,7 +74,7 @@ export default function ParkingCard({
             </span>
 
             {/* Trust shield */}
-            <div className="w-1/5 pl-2 border-l border-[#ccc] ">
+            <div className="w-1/7 pl-2 border-l border-[#ccc] ">
               <ShieldCheck className="w-4 h-4 text-green-600 " />
             </div>
           </div>

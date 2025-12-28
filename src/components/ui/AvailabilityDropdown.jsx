@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 const availabilityOptions = [
   "Every day",
   "Mon-Fri",
@@ -11,11 +13,25 @@ export default function AvailabilityDropdown({
   selected,
   setSelected,
 }) {
+  const selectorRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (selectorRef.current && !selectorRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
   return (
     <>
       {/* Dropdown Content */}
       {open && (
-        <div className="absolute top-full left-0 mt-2 w-full bg-white shadow-lg rounded-xl p-4 z-50">
+        <div
+          ref={selectorRef}
+          className="absolute top-full left-0 mt-2 w-full bg-white shadow-lg rounded-xl p-4 z-50"
+        >
           {/* Options list */}
           <div className="flex flex-col">
             {availabilityOptions.map((option) => (

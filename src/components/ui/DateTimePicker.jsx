@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const DateTimePicker = ({
@@ -10,10 +10,11 @@ const DateTimePicker = ({
 }) => {
   const now = new Date();
 
+  const pickerRef = useRef(null);
   // Minimum selectable date-time
   const minDateTime = new Date(now.getTime() + minOffsetHours * 60 * 60 * 1000);
 
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(value);
   const providedTime =
     String(value.getHours()).padStart(2, "0") +
     ":" +
@@ -23,6 +24,16 @@ const DateTimePicker = ({
   const [currentMonth, setCurrentMonth] = useState(now.getMonth());
   const [currentYear, setCurrentYear] = useState(now.getFullYear());
 
+  //click outside logic
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+        setShowPicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [setShowPicker]);
   // For rendering calendar
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const firstDayIndex =
@@ -56,9 +67,8 @@ const DateTimePicker = ({
 
   // Done button handler
   const handleDone = () => {
-    if (!selectedDate) return;
     const [h, m] = time.split(":");
-    const final = new Date(selectedDate);
+    const final = selectedDate ? new Date(selectedDate) : new Date(value);
     final.setHours(h);
     final.setMinutes(m);
     if (final < minDateTime) return; // safety
@@ -88,6 +98,7 @@ const DateTimePicker = ({
 
   return (
     <div
+      ref={pickerRef}
       className={`absolute top-full z-50 w-[280px] rounded shadow 
         "
       `}
@@ -135,6 +146,12 @@ const DateTimePicker = ({
             const day = i + 1;
             const disabled = isDateDisabled(day);
 
+            // Check if this specific day is actually today
+            const isToday =
+              day === now.getDate() &&
+              currentMonth === now.getMonth() &&
+              currentYear === now.getFullYear();
+
             const isSelected =
               selectedDate &&
               selectedDate.getDate() === day &&
@@ -152,6 +169,7 @@ const DateTimePicker = ({
                     : "hover:bg-[#1fa637] "
                 }
                 ${isSelected ? "bg-[#1fa637] text-white" : ""}
+                ${isToday ? "border border-[#1fa637]" : ""}
               `}
               >
                 {day}
@@ -169,13 +187,17 @@ const DateTimePicker = ({
             onChange={(e) => setTime(e.target.value)}
             className="w-20 border border-[#ccc] cursor-pointer rounded p-2"
           >
-            {Array.from({ length: 24 }).map((_, h) => {
-              const hour = h.toString().padStart(2, "0");
-              const disabled = selectedDate && isTimeDisabled(`${hour}:00`);
+            {Array.from({ length: 48 }).map((_, i) => {
+              const h = Math.floor(i / 2)
+                .toString()
+                .padStart(2, "0");
+              const m = i % 2 === 0 ? "00" : "30";
+              const timeVal = `${h}:${m}`;
+              const disabled = isTimeDisabled(timeVal);
 
               return (
-                <option key={h} value={`${hour}:00`} disabled={disabled}>
-                  {hour}:00
+                <option key={i} value={timeVal} disabled={disabled}>
+                  {timeVal}
                 </option>
               );
             })}

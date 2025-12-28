@@ -39,6 +39,29 @@ const ProceedBooking = () => {
   const [response, setResponse] = useState("");
   const [openModal, setOpenModal] = useState(false);
 
+  //handling vehicle info errors
+  const [vehicleError, setVehicleError] = useState("");
+  useEffect(() => {
+    const vehicle = user?.vehicle?.[0];
+
+    if (!vehicle?.brand && !vehicle?.plate) {
+      setVehicleError(
+        "You need to provide the brand and license plate information by navigating to your 'My profile' section in order to proceed the booking"
+      );
+    } else if (!vehicle?.brand && vehicle?.plate) {
+      setVehicleError(
+        "Please provide the brand name of your current vehicle by simply navigating to your 'My profile' section first"
+      );
+    } else if (vehicle?.brand && !vehicle?.plate) {
+      setVehicleError(
+        "Navigate to 'My profile' section first and fill up the license plate information in order to proceed bookings"
+      );
+    } else {
+      // Crucial: Clear the error if everything is fine
+      setVehicleError("");
+    }
+  }, [user]);
+
   useEffect(() => {
     if (from < new Date() || until < new Date()) {
       setError("The date chosen has already passed");
@@ -83,7 +106,7 @@ const ProceedBooking = () => {
         parkingLotId: parkingLot._id,
         fromTime: JSON.stringify(from),
         untilTime: JSON.stringify(until),
-        vehiclePlate: user.vehicle[0]?.plate,
+        vehiclePlate: user?.vehicle[0]?.plate || "",
       };
       const { data } = await axios.post(
         `${BACKEND}/api/V1/booking`,
@@ -139,8 +162,11 @@ const ProceedBooking = () => {
                 )}
                 <ContactInfo mobile={mobile} setMobile={setMobile} />
                 <VehicleInfo
-                  brand={user?.vehicle[0]?.brand}
-                  numberPlate={user?.vehicle[0]?.plate}
+                  brand={user?.vehicle?.[0]?.brand ? user.vehicle[0].brand : ""}
+                  numberPlate={
+                    user?.vehicle?.[0]?.plate ? user.vehicle[0].plate : ""
+                  }
+                  error={vehicleError}
                 />
                 {/* <div className="w-full p-8 flex flex-col gap-6 bg-white border border-[#dddddd] rounded-lg">
                   <h2 className="text-[#212121] text-2xl font-medium">
