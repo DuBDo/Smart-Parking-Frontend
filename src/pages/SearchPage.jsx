@@ -57,7 +57,7 @@ const SearchPage = () => {
 
   const { token } = useSelector((state) => state.user);
   const BACKEND = import.meta.env.VITE_BACKEND_URL;
-  const fetchData = async (lat, lon) => {
+  const fetchData = async () => {
     if (!lat || !lon) return;
     setLoading(true);
     try {
@@ -86,7 +86,7 @@ const SearchPage = () => {
 
   useEffect(() => {
     if (lat === null || lon === null) return;
-    fetchData(lat, lon);
+    fetchData();
   }, [lon]); //using only lon instead of both lat and lng
 
   return (
@@ -107,7 +107,8 @@ const SearchPage = () => {
           setAvailability={setAvailability}
           search={search}
           setSearch={setSearch}
-          onSearch={fetchData}
+          setNewLat={setLat}
+          setNewLon={setLon}
         />
 
         <div className="flex flex-1 overflow-hidden">

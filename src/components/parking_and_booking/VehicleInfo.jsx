@@ -1,6 +1,6 @@
 import React from "react";
 
-const VehicleInfo = ({ brand, numberPlate, error }) => {
+const VehicleInfo = ({ model, color, numberPlate, error }) => {
   return (
     <>
       <div
@@ -18,14 +18,23 @@ const VehicleInfo = ({ brand, numberPlate, error }) => {
             Your vehicle registration number will be shared with the parking
             space owner
           </p>
-          <div className="mt-3 flex flex-col gap-2 text-lg">
+          <div className="mt-3 flex flex-col gap-2 ">
             <div className="flex">
-              <div className="w-1/3 font-medium text-[#494949]">Car: </div>
-              {brand != "" && <div className=" text-[#212121]">{brand}</div>}
+              <div className="w-1/3 font-semibold text-[#666]">
+                Vehicle model:{" "}
+              </div>
+              {model != "" && <div className=" text-[#212121]">{model}</div>}
             </div>
 
             <div className="flex">
-              <div className="w-1/3 font-medium text-[#494949]">
+              <div className="w-1/3 font-semibold text-[#666]">
+                Vehicle color:{" "}
+              </div>
+              {color != "" && <div className=" text-[#212121]">{color}</div>}
+            </div>
+
+            <div className="flex">
+              <div className="w-1/3 font-semibold text-[#666]">
                 License plate info:
               </div>
               {numberPlate != "" && (

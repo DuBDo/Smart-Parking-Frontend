@@ -162,7 +162,8 @@ const ProceedBooking = () => {
                 )}
                 <ContactInfo mobile={mobile} setMobile={setMobile} />
                 <VehicleInfo
-                  brand={user?.vehicle?.[0]?.brand ? user.vehicle[0].brand : ""}
+                  brand={user?.vehicle?.[0]?.model ? user.vehicle[0].brand : ""}
+                  color={user?.vehicle?.[0]?.color ? user.vehicle[0].brand : ""}
                   numberPlate={
                     user?.vehicle?.[0]?.plate ? user.vehicle[0].plate : ""
                   }

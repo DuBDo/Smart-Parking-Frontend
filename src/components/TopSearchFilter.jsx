@@ -23,7 +23,8 @@ const TopSearchFilter = ({
   setStartingOn,
   search,
   setSearch,
-  onSearch,
+  setNewLat,
+  setNewLon,
 }) => {
   const [searhloading, setSearchLoading] = useState(false);
 
@@ -196,7 +197,11 @@ const TopSearchFilter = ({
 
             <div
               className="w-14 flex justify-center items-center"
-              onClick={() => onSearch(lat, lon)}
+              onClick={() => {
+                setNewLat(lat);
+                setNewLon(lon);
+                setShowDropdown(false);
+              }}
             >
               <IoSearch size={28} className="text-[#cccccc] cursor-pointer" />
             </div>

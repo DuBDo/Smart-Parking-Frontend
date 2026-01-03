@@ -135,7 +135,7 @@ const SearchMap = ({ lat, lon, setLat, setLng, lots = [], hovered }) => {
 
     const map = new Map({
       container: mapContainerRef.current,
-      style: MapStyle.STREETS_V2,
+      style: MapStyle.OUTDOOR_V2,
       center: [lon, lat],
       zoom: 17,
       pitch: 0,
